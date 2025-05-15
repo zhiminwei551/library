@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% block title %}管理员首页 - 图书馆管理系统{% endblock %}
+{% block content %}
+<div class="main-content" style="display: flex; height: 100vh;">
+    <!-- 左侧功能按钮 -->
+    <div class="sidebar" style="flex: 1; display: flex; flex-direction: column; gap: 1rem; justify-content: space-between; height: 100%;">
+        <!-- 查看所有学生账户按钮 -->
+        <a href="{% url 'admin_view_students' %}" class="btn btn-info btn-sm w-100 text-center" style="padding: 1rem 1rem; font-size: 1.3rem;">
+            查看所有学生账户
+        </a>
+
+        <!-- 管理图书按钮 -->
+        <a href="{% url 'admin_view_books' %}" class="btn btn-warning btn-sm w-100 text-center" style="padding: 1rem 1rem; font-size: 1.3rem;">
+            管理图书
+        </a>
+
+        <!-- 添加管理员账户按钮 -->
+        <a href="{% url 'admin_add_admin' %}" class="btn btn-success btn-sm w-100 text-center" style="padding: 1rem 1rem; font-size: 1.3rem;">
+            添加管理员账户
+        </a>
+    </div>
+
+    <!-- 右侧聊天窗口 -->
+    <div class="chat-window" style="flex: 2; height: 100%;">
+        <div class="card shadow-lg h-100" style="background-color: #f0f4f8;"> <!-- 修改card背景色 -->
+            <div class="card-body d-flex flex-column">
+                <div class="chat-title d-flex justify-content-between align-items-center">
+                    <span>通义千问系列（阿里云提供支持）</span>
+                    <!-- 清屏按钮 -->
+                    <button id="clear-button" class="btn btn-danger btn-sm">清屏</button>
+                </div>
+                <!-- 聊天内容区域 -->
+                <div id="chat-window" class="flex-grow-1 mb-3 overflow-auto border" style="background-color: #f0f4f8;"> <!-- 修改chat-window背景色 -->
+                    <!-- 默认提示语 -->
+                    <div id="default-message" class="text-center text-muted mt-5" style="font-size: 2.5rem;">
+                        有什么可以帮助你的吗？
+                    </div>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="chat-input" class="form-control" placeholder="输入您的问题...">
+                    <button id="send-button" class="btn btn-primary">发送</button>
+                </div>
+                <!-- 加载指示器 -->
+                <div id="loading-indicator" class="text-center mt-2" style="display: none;">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 正在生成回复...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- 引入 Marked.js 用于解析 Markdown -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<!-- 引入 DOMPurify.js 用于防止 XSS 攻击 -->
+<script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.4/dist/purify.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // 获取 DOM 元素
+    const chatWindow = document.getElementById('chat-window');
+    const defaultMessage = document.getElementById('default-message');
+    const clearButton = document.getElementById('clear-button');
+    const sendButton = document.getElementById('send-button');
+    const chatInput = document.getElementById('chat-input');
+
+    // WebSocket 连接
+    const chatSocket = new WebSocket(
+        'ws://' + window.location.host + '/ws/chat/'
+    );
+
+    // 检查聊天框内容，显示或隐藏默认提示语
+    function checkDefaultMessage() {
+        if (chatWindow.children.length === 1) {
+            // 聊天框中只有默认提示语
+            defaultMessage.style.display = 'block';
+        } else {
+            defaultMessage.style.display = 'none';
+        }
+    }
+
+    // 清屏功能
+    clearButton.onclick = function () {
+        // 清空聊天内容（保留默认提示）
+        chatWindow.innerHTML = '';
+        chatWindow.appendChild(defaultMessage);
+        checkDefaultMessage();
+    };
+
+    // 发送消息
+    function sendMessage() {
+        const message = chatInput.value.trim();
+        if (message === '') {
+            return;
+        }
+
+        // 创建用户消息元素
+        const userMessageElement = document.createElement('div');
+        userMessageElement.classList.add('user-message');
+        userMessageElement.innerHTML = `<span class="message-content">${DOMPurify.sanitize(marked.parse(message))}</span>`;
+        chatWindow.appendChild(userMessageElement);
+
+        // 显示加载指示器
+        document.getElementById('loading-indicator').style.display = 'block';
+
+        // 发送消息到 WebSocket
+        chatSocket.send(JSON.stringify({
+            'message': message
+        }));
+
+        // 清空输入框
+        chatInput.value = '';
+
+        // 检查提示语状态
+        checkDefaultMessage();
+
+        // 自动滚动到最新消息
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    // WebSocket 接收消息
+    chatSocket.onmessage = function (e) {
+        console.log("接收到消息:", e.data);
+        const data = JSON.parse(e.data);
+        const message = data['message'];
+
+        // 创建 AI 消息元素
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('ai-message');
+        messageElement.innerHTML = `<span class="message-content">${DOMPurify.sanitize(marked.parse(message))}</span>`;
+        chatWindow.appendChild(messageElement);
+
+        // 隐藏加载指示器
+        document.getElementById('loading-indicator').style.display = 'none';
+
+        // 检查提示语状态
+        checkDefaultMessage();
+
+        // 自动滚动到最新消息
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    };
+
+    // 回车发送消息
+    chatInput.addEventListener('keyup', function (e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    });
+
+    // 点击按钮发送消息
+    sendButton.addEventListener('click', function () {
+        sendMessage();
+    });
+
+    // 初始化时检查默认提示语状态
+    checkDefaultMessage();
+});
+</script>
+{% endblock %}

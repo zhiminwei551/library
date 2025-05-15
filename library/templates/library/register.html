@@ -1,0 +1,18 @@
+<!-- library/templates/library/register.html -->
+{% extends 'base.html' %}
+{% block title %}注册 - 图书馆管理系统{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="mb-4 text-center">学生注册</h2>
+        <form method="post" class="border p-4 bg-light">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-success w-100">注册</button>
+        </form>
+        <div class="text-center mt-3">
+            <p>已有账户？<a href="{% url 'login' %}">登录</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

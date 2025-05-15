@@ -1,0 +1,18 @@
+<!-- library/templates/library/admin_add_admin.html -->
+{% extends 'base.html' %}
+{% block title %}添加管理员账户 - 图书馆管理系统{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="mb-4 text-center">添加管理员账户</h2>
+        <form method="post" class="border p-4 bg-light">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-success w-100">添加</button>
+        </form>
+        <div class="text-center mt-3">
+            <a href="{% url 'admin_home' %}" class="btn btn-secondary">返回首页</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

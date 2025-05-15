@@ -1,0 +1,18 @@
+<!-- library/templates/library/admin_edit_book.html -->
+{% extends 'base.html' %}
+{% block title %}编辑图书 - 图书馆管理系统{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="mb-4 text-center">编辑图书</h2>
+        <form method="post" class="border p-4 bg-light">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary w-100">保存</button>
+        </form>
+        <div class="text-center mt-3">
+            <a href="{% url 'admin_view_books' %}" class="btn btn-secondary">返回</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
