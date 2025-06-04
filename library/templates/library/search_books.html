@@ -1,54 +1,207 @@
 {% extends 'base.html' %}
 {% block title %}搜索图书 - 图书馆管理系统{% endblock %}
+
+{% block extra_css %}
+<style>
+    .search-container {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        padding: 25px;
+        margin-bottom: 25px;
+    }
+    
+    .search-form {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .search-input {
+        flex: 1;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        padding: 12px 15px;
+        font-size: 1rem;
+        transition: all 0.2s;
+    }
+    
+    .search-input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+    
+    .search-button {
+        padding: 10px 20px;
+        font-weight: 500;
+    }
+    
+    .book-table-container {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        padding: 5px;
+        margin-bottom: 25px;
+        overflow: hidden;
+    }
+    
+    .empty-results {
+        padding: 40px;
+        text-align: center;
+        color: #6b7280;
+    }
+    
+    .empty-results i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        color: #d1d5db;
+    }
+    
+    .empty-results p {
+        font-size: 1.1rem;
+        margin-bottom: 5px;
+    }
+    
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+    
+    .back-button:hover {
+        transform: translateX(-3px);
+    }
+    
+    .page-title {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 30px;
+    }
+    
+    .page-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+        border-radius: 3px;
+    }
+    
+    .book-status {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .book-status.available {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #065f46;
+    }
+    
+    .book-status.unavailable {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+    }
+    
+    .borrow-btn {
+        border-radius: 6px;
+        padding: 6px 12px;
+        transition: all 0.2s;
+    }
+    
+    .borrow-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 3px 10px rgba(16, 185, 129, 0.2);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<h2 class="mb-4 text-center">搜索结果</h2>
+<div class="container">
+    <h2 class="page-title text-center">搜索结果</h2>
+    
+    <div class="search-container">
+        <form method="get" action="{% url 'search_books' %}" class="search-form">
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                <input type="text" name="q" class="form-control search-input" placeholder="输入书名进行搜索..." value="{{ query }}">
+            </div>
+            <button type="submit" class="btn btn-primary search-button">
+                <i class="fas fa-search me-2"></i>搜索
+            </button>
+        </form>
+    </div>
 
-<form method="get" action="{% url 'search_books' %}" class="form-inline mb-3">
-    <input type="text" name="q" class="form-control mr-2" placeholder="输入书名" value="{{ query }}">
-    <button type="submit" class="btn btn-primary">搜索</button>
-</form>
+    <div class="book-table-container">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th scope="col" width="8%">图书编号</th>
+                    <th scope="col" width="20%">标题</th>
+                    <th scope="col" width="15%">作者</th>
+                    <th scope="col" width="15%">出版社</th>
+                    <th scope="col" width="10%">出版年份</th>
+                    <th scope="col" width="12%">ISBN</th>
+                    <th scope="col" width="10%">借阅状态</th>
+                    <th scope="col" width="10%">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for book in books %}
+                <tr>
+                    <td>{{ book.book_id }}</td>
+                    <td>
+                        <strong>{{ book.book_title }}</strong>
+                    </td>
+                    <td>{{ book.book_author }}</td>
+                    <td>{{ book.book_publisher|default:"-" }}</td>
+                    <td>{{ book.book_year|default:"-" }}</td>
+                    <td>{{ book.isbn|default:"-" }}</td>
+                    <td>
+                        {% if book.book_state == '未借出' %}
+                            <span class="book-status available">
+                                <i class="fas fa-check-circle me-1"></i>可借阅
+                            </span>
+                        {% else %}
+                            <span class="book-status unavailable">
+                                <i class="fas fa-times-circle me-1"></i>已借出
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if book.book_state == '未借出' %}
+                            <a href="{% url 'borrow_book' book.book_id %}" class="btn btn-sm btn-success borrow-btn">
+                                <i class="fas fa-book me-1"></i>借阅
+                            </a>
+                        {% else %}
+                            <span class="text-muted">
+                                <i class="fas fa-lock me-1"></i>不可用
+                            </span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="8">
+                        <div class="empty-results">
+                            <i class="fas fa-search"></i>
+                            <p>未找到匹配的图书。</p>
+                            <small>请尝试使用其他关键词搜索，或浏览所有图书。</small>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-<table class="table table-striped table-bordered">
-    <thead>
-        <tr>
-            <th>图书编号</th>
-            <th>标题</th>
-            <th>作者</th>
-            <th>出版社</th>
-            <th>出版年份</th>
-            <th>ISBN</th>
-            <th>借阅状态</th>
-            <!-- 新增“操作”列 -->
-            <th>操作</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for book in books %}
-        <tr>
-            <td>{{ book.book_id }}</td>
-            <td>{{ book.book_title }}</td>
-            <td>{{ book.book_author }}</td>
-            <td>{{ book.book_publisher|default:"-" }}</td>
-            <td>{{ book.book_year|default:"-" }}</td>
-            <td>{{ book.isbn|default:"-" }}</td>
-            <td>{{ book.book_state }}</td>
-            <!-- 在此处根据图书状态决定是否显示“借阅”按钮 -->
-            <td>
-                {% if book.book_state == '未借出' %}
-                    <a href="{% url 'borrow_book' book.book_id %}" class="btn btn-sm btn-success">借阅</a>
-                {% else %}
-                    <span class="text-muted">已借出</span>
-                {% endif %}
-            </td>
-        </tr>
-    {% empty %}
-        <!-- 可选：如果没有搜索到书，可以添加一个空数据提示 -->
-        <tr>
-            <td colspan="8" class="text-center">未找到匹配的图书。</td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
-
-<a href="{% url 'view_all_books' %}" class="btn btn-secondary btn-back">返回所有图书</a>
+    <a href="{% url 'view_all_books' %}" class="btn btn-secondary back-button">
+        <i class="fas fa-arrow-left"></i> 返回所有图书
+    </a>
+</div>
 {% endblock %}

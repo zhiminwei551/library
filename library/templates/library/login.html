@@ -1,38 +1,224 @@
 <!-- library/templates/library/login.html -->
 {% extends 'base.html' %}
-{% load static %} <!-- 确保加载静态文件标签库 -->
+{% load static %}
 
 {% block title %}登录 - 图书馆管理系统{% endblock %}
 
+{% block extra_css %}
+<style>
+    .login-container {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .login-card {
+        width: 100%;
+        max-width: 450px;
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+    
+    .login-header {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        padding: 25px;
+        text-align: center;
+        color: white;
+    }
+    
+    .login-icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+    }
+    
+    .login-title {
+        font-size: 1.6rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .login-subtitle {
+        font-size: 0.95rem;
+        opacity: 0.9;
+    }
+    
+    .login-body {
+        padding: 35px;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 8px;
+    }
+    
+    .form-control {
+        height: 50px;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        padding: 10px 15px;
+        font-size: 1rem;
+        transition: all 0.2s;
+    }
+    
+    .form-control:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+    
+    .login-button {
+        height: 50px;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 1rem;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        transition: all 0.3s;
+    }
+    
+    .login-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(37, 99, 235, 0.25);
+    }
+    
+    .account-type-selector {
+        display: flex;
+        margin-bottom: 20px;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e5e7eb;
+    }
+    
+    .account-type-option {
+        flex: 1;
+        text-align: center;
+        padding: 15px;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+    }
+    
+    .account-type-option input {
+        position: absolute;
+        opacity: 0;
+    }
+    
+    .account-type-option label {
+        display: block;
+        cursor: pointer;
+        font-weight: 500;
+        margin: 0;
+        color: #4b5563;
+        transition: all 0.2s;
+    }
+    
+    .account-type-option i {
+        display: block;
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+        color: #6b7280;
+        transition: all 0.2s;
+    }
+    
+    .account-type-option.active {
+        background-color: #f3f4f6;
+    }
+    
+    .account-type-option.active label {
+        color: #2563eb;
+        font-weight: 600;
+    }
+    
+    .account-type-option.active i {
+        color: #2563eb;
+    }
+    
+    .account-type-option:hover:not(.active) {
+        background-color: #f9fafb;
+    }
+    
+    .register-link a {
+        color: #2563eb;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    
+    .register-link a:hover {
+        text-decoration: underline;
+        color: #1d4ed8;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-center align-items-center min-vh-100">
-    <div class="card shadow-lg" style="width: 100%; max-width: 400px;">
-        <div class="card-body">
-            <h3 class="card-title text-center mb-4">登录</h3>
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="login-icon">
+                <i class="fas fa-book-reader"></i>
+            </div>
+            <h3 class="login-title">欢迎使用图书馆管理系统</h3>
+            <p class="login-subtitle">请登录您的账户以继续</p>
+        </div>
+        <div class="login-body">
             <form method="post">
                 {% csrf_token %}
-                <!-- 账户类型 -->
-                <div class="mb-3">
-                    {{ form.account_type.label_tag }}
-                    {{ form.account_type }}
-                </div>
-                <!-- 账户号 -->
-                <div class="mb-3">
-                    {{ form.account.label_tag }}
-                    {{ form.account }}
-                </div>
-                <!-- 密码 -->
+                
+                <!-- 账户类型选择器 -->
                 <div class="mb-4">
-                    {{ form.password.label_tag }}
-                    {{ form.password }}
+                    <label class="form-label">账户类型</label>
+                    <div class="account-type-selector" id="account-type-selector">
+                        <div class="account-type-option student-option" id="student-option">
+                            <input type="radio" name="account_type" id="id_account_type_0" value="student" required>
+                            <i class="fas fa-user-graduate"></i>
+                            <label for="id_account_type_0">学生</label>
+                        </div>
+                        <div class="account-type-option admin-option" id="admin-option">
+                            <input type="radio" name="account_type" id="id_account_type_1" value="admin">
+                            <i class="fas fa-user-shield"></i>
+                            <label for="id_account_type_1">管理员</label>
+                        </div>
+                    </div>
                 </div>
+                
+                <!-- 账号输入框 -->
+                <div class="mb-4">
+                    <label for="id_account" class="form-label">账号</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-user"></i>
+                        </span>
+                        <input type="text" name="account" id="id_account" class="form-control" placeholder="请输入您的账号" required>
+                    </div>
+                </div>
+                
+                <!-- 密码输入框 -->
+                <div class="mb-4">
+                    <label for="id_password" class="form-label">密码</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                        <input type="password" name="password" id="id_password" class="form-control" placeholder="请输入您的密码" required>
+                    </div>
+                </div>
+                
                 <!-- 登录按钮 -->
-                <button type="submit" class="btn btn-primary w-100">登录</button>
+                <div class="mb-4">
+                    <button type="submit" class="btn btn-primary w-100 login-button">
+                        <i class="fas fa-sign-in-alt me-2"></i>登录
+                    </button>
+                </div>
+                
+                <!-- 注册链接 -->
+                <div class="text-center register-link" id="register-link" style="display: none;">
+                    <p>没有账户？<a href="{% url 'register' %}">立即注册</a></p>
+                </div>
             </form>
-            <!-- 注册链接，仅在学生账户类型选择时显示 -->
-            <div class="mt-3 text-center" id="register-link" style="display: none;">
-                <p>没有账户？<a href="{% url 'register' %}">注册</a></p>
-            </div>
         </div>
     </div>
 </div>
@@ -41,29 +227,57 @@
 {% block extra_js %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const accountTypeRadios = document.querySelectorAll('input[name="account_type"]');
+        // 获取元素
+        const studentOption = document.getElementById('student-option');
+        const adminOption = document.getElementById('admin-option');
+        const studentRadio = document.getElementById('id_account_type_0');
+        const adminRadio = document.getElementById('id_account_type_1');
         const registerLink = document.getElementById('register-link');
-
-        function toggleRegisterLink() {
-            let selectedType = '';
-            accountTypeRadios.forEach(radio => {
-                if (radio.checked) {
-                    selectedType = radio.value;
-                }
-            });
-            if (selectedType === 'student') {
+        
+        // 设置初始状态
+        if (studentRadio.checked) {
+            studentOption.classList.add('active');
+            registerLink.style.display = 'block';
+        } else if (adminRadio.checked) {
+            adminOption.classList.add('active');
+        } else {
+            // 默认选择学生
+            studentRadio.checked = true;
+            studentOption.classList.add('active');
+            registerLink.style.display = 'block';
+        }
+        
+        // 点击学生选项
+        studentOption.addEventListener('click', function() {
+            studentRadio.checked = true;
+            studentOption.classList.add('active');
+            adminOption.classList.remove('active');
+            registerLink.style.display = 'block';
+        });
+        
+        // 点击管理员选项
+        adminOption.addEventListener('click', function() {
+            adminRadio.checked = true;
+            adminOption.classList.add('active');
+            studentOption.classList.remove('active');
+            registerLink.style.display = 'none';
+        });
+        
+        // 监听单选框变化
+        studentRadio.addEventListener('change', function() {
+            if (this.checked) {
+                studentOption.classList.add('active');
+                adminOption.classList.remove('active');
                 registerLink.style.display = 'block';
-            } else {
+            }
+        });
+        
+        adminRadio.addEventListener('change', function() {
+            if (this.checked) {
+                adminOption.classList.add('active');
+                studentOption.classList.remove('active');
                 registerLink.style.display = 'none';
             }
-        }
-
-        // 初始检查
-        toggleRegisterLink();
-
-        // 监听账户类型选择变化
-        accountTypeRadios.forEach(radio => {
-            radio.addEventListener('change', toggleRegisterLink);
         });
     });
 </script>

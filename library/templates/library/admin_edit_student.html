@@ -1,17 +1,292 @@
 <!-- library/templates/library/admin_edit_student.html -->
 {% extends 'base.html' %}
 {% block title %}编辑学生账户 - 图书馆管理系统{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+    
+    .form-card {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        margin-bottom: 25px;
+    }
+    
+    .form-header {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+        padding: 25px;
+        text-align: center;
+    }
+    
+    .form-icon {
+        width: 80px;
+        height: 80px;
+        background-color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-icon i {
+        font-size: 2.5rem;
+        color: #2563eb;
+    }
+    
+    .student-badge {
+        display: inline-block;
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        padding: 5px 15px;
+        margin-top: 5px;
+        font-weight: 600;
+    }
+    
+    .form-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+    
+    .form-subtitle {
+        font-size: 0.95rem;
+        opacity: 0.9;
+    }
+    
+    .form-body {
+        padding: 30px;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 8px;
+        display: block;
+    }
+    
+    .form-control {
+        height: 50px;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        padding: 10px 15px;
+        font-size: 1rem;
+        transition: all 0.2s;
+        width: 100%;
+    }
+    
+    .form-control:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        outline: none;
+    }
+    
+    /* 自定义Django表单样式 */
+    form p {
+        margin-bottom: 20px;
+    }
+    
+    form p label {
+        display: block;
+        font-weight: 500;
+        color: #374151;
+        margin-bottom: 8px;
+    }
+    
+    form p input,
+    form p select,
+    form p textarea {
+        width: 100%;
+        height: 50px;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        padding: 10px 15px;
+        font-size: 1rem;
+        transition: all 0.2s;
+    }
+    
+    form p input:focus,
+    form p select:focus,
+    form p textarea:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        outline: none;
+    }
+    
+    form p span.helptext {
+        display: block;
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-top: 5px;
+    }
+    
+    /* 错误信息样式 */
+    form p ul.errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 5px 0 0 0;
+        color: #ef4444;
+        font-size: 0.85rem;
+    }
+    
+    form p ul.errorlist li::before {
+        content: "• ";
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+    }
+    
+    .submit-button {
+        flex: 1;
+        height: 50px;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        transition: all 0.3s;
+    }
+    
+    .submit-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(37, 99, 235, 0.25);
+    }
+    
+    .back-button {
+        height: 50px;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s;
+    }
+    
+    .back-button:hover {
+        transform: translateX(-3px);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <h2 class="mb-4 text-center">编辑学生账户: {{ student_account }}</h2>
-        <form method="post" class="border p-4 bg-light">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-primary w-100">保存</button>
-        </form>
-        <div class="text-center mt-3">
-            <a href="{% url 'admin_view_students' %}" class="btn btn-secondary">返回</a>
+<div class="form-container">
+    <div class="form-card">
+        <div class="form-header">
+            <div class="form-icon">
+                <i class="fas fa-user-edit"></i>
+            </div>
+            <h2 class="form-title">编辑学生账户</h2>
+            <p class="form-subtitle">修改学生用户的个人信息</p>
+            <div class="student-badge">
+                <i class="fas fa-id-card me-1"></i>{{ student_account }}
+            </div>
+        </div>
+        
+        <div class="form-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                    
+                    {% if field.field.widget.input_type == 'password' %}
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                        {{ field }}
+                    </div>
+                    {% elif field.name == 'email' %}
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-envelope"></i>
+                        </span>
+                        {{ field }}
+                    </div>
+                    {% elif field.name == 'student_id' or field.name == 'username' %}
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-id-card"></i>
+                        </span>
+                        {{ field }}
+                    </div>
+                    {% elif field.name == 'name' %}
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-user"></i>
+                        </span>
+                        {{ field }}
+                    </div>
+                    {% elif field.name == 'phone' %}
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-phone"></i>
+                        </span>
+                        {{ field }}
+                    </div>
+                    {% elif field.name == 'dept' %}
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-university"></i>
+                        </span>
+                        {{ field }}
+                    </div>
+                    {% elif field.name == 'major' %}
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-graduation-cap"></i>
+                        </span>
+                        {{ field }}
+                    </div>
+                    {% else %}
+                    {{ field }}
+                    {% endif %}
+                    
+                    {% if field.help_text %}
+                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                    {% endif %}
+                    
+                    {% if field.errors %}
+                    <div class="invalid-feedback d-block">
+                        {% for error in field.errors %}
+                        <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary submit-button">
+                        <i class="fas fa-save"></i>
+                        <span>保存修改</span>
+                    </button>
+                    <a href="{% url 'admin_view_students' %}" class="btn btn-secondary back-button">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>返回列表</span>
+                    </a>
+                </div>
+            </form>
         </div>
     </div>
 </div>

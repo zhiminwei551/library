@@ -1,45 +1,269 @@
 <!-- library/templates/library/view_all_books.html -->
 {% extends 'base.html' %}
 {% block title %}所有图书 - 图书馆管理系统{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 30px;
+        position: relative;
+    }
+    
+    .page-title {
+        font-weight: 600;
+        position: relative;
+        display: inline-block;
+        margin-bottom: 0;
+    }
+    
+    .page-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background: linear-gradient(90deg, var(--primary-color), var(--primary-dark));
+        border-radius: 3px;
+    }
+    
+    .books-container {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        padding: 25px;
+        margin-bottom: 25px;
+    }
+    
+    .search-container {
+        margin-bottom: 25px;
+    }
+    
+    .search-form {
+        display: flex;
+        gap: 10px;
+        max-width: 500px;
+    }
+    
+    .search-input {
+        flex: 1;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        padding: 12px 15px;
+        font-size: 1rem;
+        transition: all 0.2s;
+    }
+    
+    .search-input:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+    
+    .search-button {
+        padding: 10px 20px;
+        font-weight: 500;
+    }
+    
+    .books-table-container {
+        overflow-x: auto;
+    }
+    
+    .books-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    
+    .books-table th {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: white;
+        font-weight: 500;
+        text-align: left;
+        padding: 15px;
+        position: sticky;
+        top: 0;
+    }
+    
+    .books-table th:first-child {
+        border-top-left-radius: 8px;
+    }
+    
+    .books-table th:last-child {
+        border-top-right-radius: 8px;
+    }
+    
+    .books-table td {
+        padding: 15px;
+        border-bottom: 1px solid #e5e7eb;
+        vertical-align: middle;
+    }
+    
+    .books-table tbody tr {
+        transition: background-color 0.2s;
+    }
+    
+    .books-table tbody tr:hover {
+        background-color: #f9fafb;
+    }
+    
+    .books-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .books-table tbody tr:last-child td:first-child {
+        border-bottom-left-radius: 8px;
+    }
+    
+    .books-table tbody tr:last-child td:last-child {
+        border-bottom-right-radius: 8px;
+    }
+    
+    .book-title {
+        font-weight: 600;
+        color: #1f2937;
+    }
+    
+    .book-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    
+    .book-status.available {
+        background-color: rgba(16, 185, 129, 0.1);
+        color: #065f46;
+    }
+    
+    .book-status.unavailable {
+        background-color: rgba(239, 68, 68, 0.1);
+        color: #b91c1c;
+    }
+    
+    .book-status i {
+        margin-right: 5px;
+    }
+    
+    .action-btn {
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-weight: 500;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    .borrow-btn {
+        background-color: #10b981;
+        border-color: #10b981;
+    }
+    
+    .borrow-btn:hover {
+        background-color: #059669;
+        border-color: #059669;
+        box-shadow: 0 3px 10px rgba(16, 185, 129, 0.2);
+    }
+    
+    .unavailable-text {
+        color: #9ca3af;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    
+    .back-button:hover {
+        transform: translateX(-3px);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<h2 class="mb-4 text-center">所有图书</h2>
-<form method="get" action="{% url 'search_books' %}" class="form-inline mb-3">
-    <input type="text" name="q" class="form-control mr-2" placeholder="输入书名">
-    <button type="submit" class="btn btn-primary">搜索</button>
-</form>
-<table class="table table-striped table-bordered">
-    <thead>
-        <tr>
-            <th>图书编号</th>
-            <th>标题</th>
-            <th>作者</th>
-            <th>出版社</th>
-            <th>出版年份</th>
-            <th>ISBN</th>
-            <th>借阅状态</th>
-            <th>操作</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for book in books %}
-        <tr>
-            <td>{{ book.book_id }}</td>
-            <td>{{ book.book_title }}</td>
-            <td>{{ book.book_author }}</td>
-            <td>{{ book.book_publisher|default:"-" }}</td>
-            <td>{{ book.book_year|default:"-" }}</td>
-            <td>{{ book.isbn|default:"-" }}</td>
-            <td>{{ book.book_state }}</td>
-            <td>
-                {% if book.book_state == '未借出' %}
-                    <a href="{% url 'borrow_book' book.book_id %}" class="btn btn-sm btn-success">借阅</a>
-                {% else %}
-                    <span class="text-muted">已借出</span>
-                {% endif %}
-            </td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
-<a href="{% url 'student_home' %}" class="btn btn-secondary btn-back">返回首页</a>
+<div class="container">
+    <div class="page-header text-center">
+        <h2 class="page-title">图书馆藏书目录</h2>
+    </div>
+    
+    <div class="books-container">
+        <div class="search-container">
+            <form method="get" action="{% url 'search_books' %}" class="search-form">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" name="q" class="form-control search-input" placeholder="输入书名、作者或关键词进行搜索...">
+                </div>
+                <button type="submit" class="btn btn-primary search-button">
+                    <i class="fas fa-search me-2"></i>搜索
+                </button>
+            </form>
+        </div>
+        
+        <div class="books-table-container">
+            <table class="books-table">
+                <thead>
+                    <tr>
+                        <th width="8%">图书编号</th>
+                        <th width="20%">标题</th>
+                        <th width="15%">作者</th>
+                        <th width="15%">出版社</th>
+                        <th width="10%">出版年份</th>
+                        <th width="12%">ISBN</th>
+                        <th width="10%">借阅状态</th>
+                        <th width="10%">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for book in books %}
+                    <tr>
+                        <td>{{ book.book_id }}</td>
+                        <td class="book-title">{{ book.book_title }}</td>
+                        <td>{{ book.book_author }}</td>
+                        <td>{{ book.book_publisher|default:"-" }}</td>
+                        <td>{{ book.book_year|default:"-" }}</td>
+                        <td>{{ book.isbn|default:"-" }}</td>
+                        <td>
+                            {% if book.book_state == '未借出' %}
+                                <span class="book-status available">
+                                    <i class="fas fa-check-circle"></i>可借阅
+                                </span>
+                            {% else %}
+                                <span class="book-status unavailable">
+                                    <i class="fas fa-times-circle"></i>已借出
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if book.book_state == '未借出' %}
+                                <a href="{% url 'borrow_book' book.book_id %}" class="btn btn-sm btn-success action-btn borrow-btn">
+                                    <i class="fas fa-book me-1"></i>借阅
+                                </a>
+                            {% else %}
+                                <span class="unavailable-text">
+                                    <i class="fas fa-lock me-1"></i>不可用
+                                </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <a href="{% url 'student_home' %}" class="btn btn-secondary back-button">
+        <i class="fas fa-arrow-left"></i> 返回首页
+    </a>
+</div>
 {% endblock %}

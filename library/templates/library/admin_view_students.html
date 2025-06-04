@@ -1,39 +1,268 @@
 <!-- library/templates/library/admin_view_students.html -->
 {% extends 'base.html' %}
 {% block title %}所有学生账户 - 图书馆管理系统{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        margin-bottom: 30px;
+        position: relative;
+    }
+    
+    .page-title {
+        font-weight: 600;
+        position: relative;
+        display: inline-block;
+        margin-bottom: 0;
+    }
+    
+    .page-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 50px;
+        height: 3px;
+        background: linear-gradient(90deg, #7c3aed, #6025c0);
+        border-radius: 3px;
+    }
+    
+    .students-container {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        padding: 25px;
+        margin-bottom: 25px;
+    }
+    
+    .action-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+    
+    .add-student-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background-color: #10b981;
+        border-color: #10b981;
+        font-weight: 500;
+        border-radius: 8px;
+        padding: 10px 20px;
+        transition: all 0.2s;
+    }
+    
+    .add-student-btn:hover {
+        background-color: #059669;
+        border-color: #059669;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(16, 185, 129, 0.2);
+    }
+    
+    .students-table-container {
+        overflow-x: auto;
+    }
+    
+    .students-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    
+    .students-table th {
+        background: linear-gradient(135deg, #7c3aed, #6025c0);
+        color: white;
+        font-weight: 500;
+        text-align: left;
+        padding: 15px;
+        position: sticky;
+        top: 0;
+    }
+    
+    .students-table th:first-child {
+        border-top-left-radius: 8px;
+    }
+    
+    .students-table th:last-child {
+        border-top-right-radius: 8px;
+    }
+    
+    .students-table td {
+        padding: 15px;
+        border-bottom: 1px solid #e5e7eb;
+        vertical-align: middle;
+    }
+    
+    .students-table tbody tr {
+        transition: background-color 0.2s;
+    }
+    
+    .students-table tbody tr:hover {
+        background-color: #f9fafb;
+    }
+    
+    .students-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .student-name {
+        font-weight: 600;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .student-name i {
+        color: #7c3aed;
+        font-size: 1.1rem;
+    }
+    
+    .action-btn {
+        margin: 0 3px;
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-weight: 500;
+        font-size: 0.875rem;
+        transition: all 0.2s;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    .loans-btn {
+        background-color: #0ea5e9;
+        border-color: #0ea5e9;
+    }
+    
+    .loans-btn:hover {
+        background-color: #0284c7;
+        border-color: #0284c7;
+        box-shadow: 0 3px 10px rgba(14, 165, 233, 0.2);
+    }
+    
+    .edit-btn {
+        background-color: #3b82f6;
+        border-color: #3b82f6;
+    }
+    
+    .edit-btn:hover {
+        background-color: #2563eb;
+        border-color: #2563eb;
+        box-shadow: 0 3px 10px rgba(37, 99, 235, 0.2);
+    }
+    
+    .delete-btn {
+        background-color: #ef4444;
+        border-color: #ef4444;
+    }
+    
+    .delete-btn:hover {
+        background-color: #dc2626;
+        border-color: #dc2626;
+        box-shadow: 0 3px 10px rgba(239, 68, 68, 0.2);
+    }
+    
+    .empty-students {
+        padding: 40px;
+        text-align: center;
+        color: #6b7280;
+    }
+    
+    .empty-students i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        color: #d1d5db;
+    }
+    
+    .empty-students p {
+        font-size: 1.1rem;
+        margin-bottom: 5px;
+    }
+    
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    
+    .back-button:hover {
+        transform: translateX(-3px);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<h2 class="mb-4 text-center">所有学生账户</h2>
-<a href="{% url 'admin_add_student' %}" class="btn btn-success mb-3">添加学生</a>
-{% if students %}
-<table class="table table-striped table-bordered">
-    <thead>
-        <tr>
-            <th>账户号</th>
-            <th>姓名</th>
-            <th>邮箱</th>
-            <th>电话</th>
-            <th>操作</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for student in students %}
-        <tr>
-            <td>{{ student.student_account }}</td>
-            <td>{{ student.student_name }}</td>
-            <td>{{ student.student_email|default:"-" }}</td>
-            <td>{{ student.student_phone|default:"-" }}</td>
-            <td>
-                <a href="{% url 'admin_view_student_loans' student.student_account %}" class="btn btn-sm btn-info">借阅记录</a>
-                <a href="{% url 'admin_edit_student' student.student_account %}" class="btn btn-sm btn-primary">编辑</a>
-                <a href="{% url 'admin_delete_student' student.student_account %}" class="btn btn-sm btn-danger"
-                   onclick="return confirm('确定删除此学生吗？')">删除</a>
-            </td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<p>暂无学生账户信息。</p>
-{% endif %}
-<a href="{% url 'admin_home' %}" class="btn btn-secondary btn-back">返回首页</a>
+<div class="container">
+    <div class="page-header text-center">
+        <h2 class="page-title">学生账户管理</h2>
+    </div>
+    
+    <div class="students-container">
+        <div class="action-bar">
+            <a href="{% url 'admin_add_student' %}" class="btn btn-success add-student-btn">
+                <i class="fas fa-user-plus"></i> 添加新学生
+            </a>
+        </div>
+        
+        {% if students %}
+        <div class="students-table-container">
+            <table class="students-table">
+                <thead>
+                    <tr>
+                        <th width="15%">账户号</th>
+                        <th width="20%">姓名</th>
+                        <th width="25%">邮箱</th>
+                        <th width="15%">电话</th>
+                        <th width="25%">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for student in students %}
+                    <tr>
+                        <td>{{ student.student_account }}</td>
+                        <td>
+                            <div class="student-name">
+                                <i class="fas fa-user-graduate"></i>
+                                {{ student.student_name }}
+                            </div>
+                        </td>
+                        <td>{{ student.student_email|default:"-" }}</td>
+                        <td>{{ student.student_phone|default:"-" }}</td>
+                        <td>
+                            <a href="{% url 'admin_view_student_loans' student.student_account %}" class="btn btn-sm btn-info action-btn loans-btn">
+                                <i class="fas fa-history me-1"></i>借阅记录
+                            </a>
+                            <a href="{% url 'admin_edit_student' student.student_account %}" class="btn btn-sm btn-primary action-btn edit-btn">
+                                <i class="fas fa-edit me-1"></i>编辑
+                            </a>
+                            <a href="{% url 'admin_delete_student' student.student_account %}" class="btn btn-sm btn-danger action-btn delete-btn"
+                               onclick="return confirm('确定删除此学生账户吗？所有关联的借阅记录也将被删除！')">
+                                <i class="fas fa-trash-alt me-1"></i>删除
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-students">
+            <i class="fas fa-users"></i>
+            <p>暂无学生账户信息</p>
+            <small>目前系统中没有任何学生账户，您可以点击"添加新学生"按钮创建学生账户。</small>
+        </div>
+        {% endif %}
+    </div>
+    
+    <a href="{% url 'admin_home' %}" class="btn btn-secondary back-button">
+        <i class="fas fa-arrow-left"></i> 返回首页
+    </a>
+</div>
 {% endblock %}
