@@ -49,14 +49,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         """
         client = OpenAI(
             api_key=os.getenv("DASHSCOPE_API_KEY"),
-            base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
+            base_url="https://api.deepseek.com/v1"
         )
 
         try:
             logger.info(f"调用 API: {user_message}")
             # 调用模型生成回复
             completion = client.chat.completions.create(
-                model="qwen-plus",  # 使用的模型名称
+                model="deepseek-chat",  # 使用的模型名称
                 messages=[
                     {'role': 'system', 'content': 'You are a helpful assistant.'},
                     {'role': 'user', 'content': user_message}
